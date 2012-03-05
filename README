@@ -1,1 +1,40 @@
 This is a component for the CMS Joomla to use RPC with JSON. Now it is in developer state and not stable to install. If the first stable version is tested it will be printed here. The goal of this project is a extension to simple add any other components to get json responses for external devices like iPhone/iPad and so on.
+
+URL at Joomla:
+http://www.yourdomain.yourextension/index.php?option=com_rpcjson
+
+
+HowToUse:
+It includes a default service which is inlcuded. The name of the service is globally defined with "rpc". If you implement a custom
+service you should implement a class with some public methods. 
+
+Sample Service:
+class myClass {
+	public function ping($msg) {
+		return "pong:" . $msg;
+	}
+	
+	public function test2() {
+		return "test2: OK";
+	}
+	
+	private function test() {
+		return "test: ok!";
+	}
+}
+
+Samples Request/Responses:
+Request -> {"jsonrpc": "2.0", "method": "rpc.listm", "id": 1}
+Response <- {"jsonrpc":"2.0","result":{"myClass":["ping","test2"]},"id":1}
+
+Request -> {"jsonrpc": "2.0", "method": "myClass.ping", "params": ["hello world"], "id": 1}
+Response <- {"jsonrpc":"2.0","result":["pong:hello world"],"id":1}
+
+FIXED:
+- The key "error" should not be at all responses. The key "error" is only includes if it is really an error.
+
+TODO's:
+- If the method exists but the parameter are wrong it should display a error message only at debug mode.
+- Change the validate() to Joomla Framework methods to check the response.
+- Multiple rpc requests at one http request ?
+- Use a Error Object to handle and build responses.
