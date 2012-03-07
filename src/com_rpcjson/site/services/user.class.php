@@ -41,22 +41,17 @@ class user {
     public function logout ($auth) {
     }
 
+    //public function get_stories ($username = null, $password = null) {
     public function get_stories ($auth) {
 	//public function get_stories() {
 	    $result = new stdClass();
-	    
-	    $s = base64_decode($auth);
-	    $a = explode('$', $s);
-	    
- 	    if( rpcjson_helper::login_user($a[0], $a[1]) < 60 ) {
- 	        $result->failure = 'Invalid username or password!';
- 	        return $result;
- 	    }
+	    	    
+ 	    //if( rpcjson_helper::login_user($a[0], $a[1]) < 60 ) {
+ 	    //    $result->failure = 'Invalid username or password!';
+ 	    //    return $result;
+ 	    //}
  	    
-	    $result->type = 'stories';
-	    
-	    //echo base64_encode('flomll$'.'exP23jnet');
-	    
+        
 	    // FIXME: your code.
 	    $result->data = "coming soon...";
 	    

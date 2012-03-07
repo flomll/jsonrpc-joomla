@@ -38,3 +38,6 @@ TODO's:
 - Change the validate() to Joomla Framework methods to check the response.
 - Multiple rpc requests at one http request ?
 - Use a Error Object to handle and build responses.
+- Turn off error reporting
+- Add a parameter at administration panel to select the security level (play load encryted, username and password encrypted, nothing encrypted)
+- Add a parameter at administration panel to select the authenticaion mechanism (session handled, username and password on every submit)

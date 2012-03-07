@@ -24,12 +24,15 @@
 		<filename>views/rpcjson/tmpl/index.html</filename>
 		<filename>views/rpcjson/tmpl/default.php</filename>
 		<filename>views/index.html</filename>
-		<filename>classes/index.html</filename>
-		<filename>classes/jsonrpcs.php</filename>
+		<filename>server/index.html</filename>
+		<filename>server/server.class.php</filename>
+		<filename>server/errors.class.php</filename>
+		<filename>server/helper.class.php</filename>
+		<filename>server/responses.class.php</filename>
 		<filename>services/index.html</filename>
-		<filename>services/rpc.php</filename>
-		<filename>services/user.php</filename>
-		<filename>services/blogger.php</filename>
+		<filename>services/rpc.class.php</filename>
+		<filename>services/user.class.php</filename>
+		<filename>services/blogger.class.php</filename>
 	</files>
 
 	<!--<install>
