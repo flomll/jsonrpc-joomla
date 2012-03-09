@@ -28,7 +28,7 @@ class Errors {
         JSON_PARSER_ERROR 	=> 'JSON Parser Error',
         INVALID_REQUEST 	=> 'Invalid Request',
         METHOD_NOT_FOUND 	=> 'Method not found',
-        INVALID_PARAMS 		=> 'Invalids Params',
+        INVALID_PARAMS 		=> 'Invalid Params',
         INTERNAL_ERROR 		=> 'Internal Error',
         CLASS_NOT_FOUND     => 'Class Not Found'
     );
