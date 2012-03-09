@@ -29,6 +29,7 @@ FIXED: [14-02-2012]
 - The key "error" should not be at all responses. The key "error" is only includes if it is really an error.
 
 TODO's:
+- Add a signature to the response/request to verify the message.
 - If the method exists but the parameter are wrong it should display a error message only at debug mode.
 - Change the validate() to Joomla Framework methods to check the response.
 - Multiple rpc requests at one http request ?
