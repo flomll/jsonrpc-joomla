@@ -15,14 +15,15 @@ Response <- {"jsonrpc":"2.0","result":{"myClass":["ping","test2"]},"id":1}
 Request -> {"jsonrpc": "2.0", "method": "myClass.ping", "params": ["hello world"], "id": 1}
 Response <- {"jsonrpc":"2.0","result":["pong:hello world"],"id":1}
 
-Request -> 	{"jsonrpc":"2.0","method":"user.get_stories",
+Request -> 	{"jsonrpc":"2.0","method":"user.get_articles_intro",
 			"params":
 				[
-					0, 1, "", "id", "ASC",
+					0, 1, "", "id ASC",
 					"demo","demo"
 				],
 			"id":1
 		}
+
 Response <- All available contents.
 
 FIXED: [14-02-2012]

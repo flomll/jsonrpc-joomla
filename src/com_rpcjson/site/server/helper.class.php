@@ -92,19 +92,16 @@ class rpcjson_helper {
 		$app->logout();
 	}
 	
-	function build_db_query($query, $start, $limit, $where, $order_by, $order) {	
-		if($where != "")
-		{
+	function build_db_query($query, $start, $limit, $where, $order) {	
+		if($where != "") {
 			$query .= " WHERE ".$where;
 		}
 
-		if($order != "" && $order_by != "")
-		{
+		if($order != "") {
 			$query .= " ORDER BY ".$order_by." ".$order;
 		}
-
-		if($start != "" && $limit != "")
-		{
+        
+		if( ($start != "" || $start == 0) && $limit != "") {
 			$query .= " LIMIT ".$start.", ".$limit." ";
 		}
 	    
