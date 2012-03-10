@@ -27,6 +27,16 @@ class rpc {
 		return $object;
 	}
 	
+	public function copyright () {
+	    $object = new stdClass();
+	    $object->author = 'Florian Müller BSc.';
+	    $object->license = 'GNU';
+	    $object->email = 'florian.mueller@mublasafu.net';
+	    $object->copyright = 'Copyright (c) by www.mublasafu.net';
+	    
+	    return $object;
+	}
+	
 	/**
 	 */
 	public function listmethods () {
