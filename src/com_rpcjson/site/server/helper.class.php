@@ -42,7 +42,20 @@ class rpcjson_helper {
 		return (substr(rpcjson_helper::get_joomla_version(), 0, 3) == '1.5');
 	}
 	
-    function login_user ($username, $password) {
+	function get_component_parameter($name, $default = "") {
+		static $params = null;
+
+		if($params == null)
+		{
+			// load component params info
+			$params =& JComponentHelper::getParams(RPCJSON_COMPONENT_NAME);
+		}
+
+		return $params->get($name, $default);
+	}
+	
+    function login_user ($username, $password, $service) 
+    {
 		$userId = -1;		$credentials = array('username' => $username, 'password' => $password);
 		$options = array('silent' => true);
 
@@ -76,10 +89,31 @@ class rpcjson_helper {
 			$userId = JUserHelper::getUserId($username);
 			$user = JUser::getInstance($userId);
 
-			//$minusergroup = JoomlaAdminMobileHelper::getComponentParameter('minusergroup', 25);
+            // FIXME: Add a parameter to the component
+            if($service == 'user') {
+                $minusergroup = 0;
+			    //$minusergroup = JoomlaAdminMobileHelper::getComponentParameter('minusergroup', 25);
+			} else if ($service == 'blogger') {
+			    $minusergroup = 1;
+			    //$minusergroup = JoomlaAdminMobileHelper::getComponentParameter('minusergroup', 25);
+			} else {
+			    $minusergroup = 2;
+			}
 			$minusergroup = 2;
 			
-			// FIXME:
+			if ( rpcjson_helper::is_joomla15() && property_exists($user, "gid") )
+			{
+				// Joomla! 1.5
+				if ($user->gid < $minusergroup)
+				{
+					$userId = -2;
+				}
+			} else if (!$user->authorise('core.admin') && !JAccess::check($userId, 'core.manage', RPCJSON_COMPONENT_NAME))
+			{
+				// Joomla16, we are not a Super Admin and we do not have access to the component
+				// Joomla! 1.6
+				$userId = -2;
+			}
 		}
 
 
@@ -108,18 +142,18 @@ class rpcjson_helper {
 	    return $query;
 	}
 	
-	function build_payload($username, $password, $query, $multipleRows, $checkoutTable = null, $checkoutId = null, $includeCount = false) {
+	function build_payload($username, $password, $service, $query, $multipleRows, $checkoutTable = null, $checkoutId = null, $includeCount = false) 
+	{
+	    $response = new stdClass();
         // User Authentication
 //         if(($userId = JoomlaAdminMobileHelper::loginUser($username, $password)) <= 0) {
 //             return new xmlrpcresp(0, XMLRPC_ERR_LOGIN_FAILED, JText::_(JoomlaAdminMobileHelper::loginUserError($userId)));
 //         }
         // Check the authority of the user. This should be done on every service function.
-   	    if( rpcjson_helper::login_user($username, $password) <= 0 ) {
+   	    if( rpcjson_helper::login_user($username, $password, $service) <= 0 ) {
  	        $response->failure = 'Invalid username or password!';
  	        return $response;
  	    }
-
-
 
         // Security check
 // 		if($checkoutTable != null && $checkoutId != null)
@@ -139,8 +173,13 @@ class rpcjson_helper {
 
 		$db = &JFactory::getDBO();
 		$db->setQuery($query);
-		$objectList = $db->loadObjectList();
-		$response = $objectList;
+		$db->query();
+ 	    // Add rows number if the 
+ 	    if($multipleRows == TRUE)
+ 	    {
+ 	        $response->count = $db->getNumRows();
+ 	    }
+		$response->data = $db->loadObjectList();
 
         // Error handling for DB
 		if( $db->getErrorNum() )

@@ -26,6 +26,13 @@ Request -> 	{"jsonrpc":"2.0","method":"user.get_articles_intro",
 
 Response <- All available contents.
 
+{"jsonrpc":"2.0","method":"user.get_users",
+"params": [
+"demo","demo", 0, 10, "", "ASC"
+],
+"id":1
+}
+
 FIXED: [14-02-2012]
 - The key "error" should not be at all responses. The key "error" is only includes if it is really an error.
 
