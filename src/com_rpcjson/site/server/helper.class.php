@@ -132,11 +132,11 @@ class rpcjson_helper {
 		}
 
 		if($order != "") {
-			$query .= " ORDER BY ".$order_by." ".$order;
+			$query .= " ORDER BY ".$order;
 		}
         
 		if( ($start != "" || $start == 0) && $limit != "") {
-			$query .= " LIMIT ".$start.", ".$limit." ";
+			$query .= " LIMIT ".(int)$start.", ".(int)$limit." ";
 		}
 	    
 	    return $query;
@@ -174,23 +174,28 @@ class rpcjson_helper {
 		$db = &JFactory::getDBO();
 		$db->setQuery($query);
 		$db->query();
+		
  	    // Add rows number if the 
+		$response->count = $db->getNumRows();
+
+        // Load array of data if more then one here.
  	    if($multipleRows == TRUE)
  	    {
- 	        $response->count = $db->getNumRows();
+ 	        $response->data = $db->loadObjectList();
+ 	    } else
+ 	    {
+ 	        $response->data = $db->loadObject();
  	    }
-		$response->data = $db->loadObjectList();
 
         // Error handling for DB
 		if( $db->getErrorNum() )
 //		if($db->getErrorNum() && JoomlaAdminMobileHelper::getComponentParameter("debug"))
 		{
 			//JoomlaAdminMobileHelper::respondAndDie($db->getErrorMsg());
-			echo $db->getErrorMsg();
+			return $db->getErrorMsg();
 		}
 
         // Log the user out
-//		JoomlaAdminMobileHelper::logoutUser();
         rpcjson_helper::logout_user();
 		return $response;
 	}
