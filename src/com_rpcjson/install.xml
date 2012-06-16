@@ -31,6 +31,9 @@
 		<filename>server/responses.class.php</filename>
 		<filename>services/index.html</filename>
 		<filename>services/rpc.class.php</filename>
+		<filename>services/system.class.php</filename>
+		<filename>services/content.class.php</filename>
+		<filename>services/poll.class.php</filename>
 		<filename>services/user.class.php</filename>
 		<filename>services/blogger.class.php</filename>
 	</files>

@@ -53,13 +53,13 @@ define (TAG_TYPE_EVENT,         'event');
  *
  * @description TODO
  */
-class user {
+class User {
     
-    public function login ($username, $password) {
+    private function login ($username, $password) {
         return 'NOT IMPLEMENTED';
     }
     
-    public function logout () {
+    private function logout () {
         return 'NOT IMPLEMENTED';
     }
 
@@ -79,8 +79,8 @@ class user {
     private function get_articles_intro ($username, $password, $start, $limit, $where, $order) {
         //FIXME: Check inputs
     
-	    $result = new stdClass();
-	    $tagtype = TAG_TYPE_ARTICLE;
+//	    $result = new stdClass();
+//	    $tagtype = TAG_TYPE_ARTICLE;
 	    	    
         $db =& JFactory::getDBO();
    	    if( rpcjson_helper::is_joomla15() ) { 
@@ -105,7 +105,15 @@ class user {
 
 	    // Take the query and load the data from the database. This function is secured 
 	    // by password and username. It logs the user in on execution and log out on return.
-	    return rpcjson_helper::build_payload ($username, $password, get_class($this), $query, TRUE);
+	    $contents = rpcjson_helper::build_payload ($username, $password, get_class($this), $query, TRUE);
+
+        // Clear the html tags from the introtext
+	    foreach($contents->data as $content)
+	    {
+	        $content->introtext = strip_tags($content->introtext);
+	    }
+	    
+	    return $contents;
 	}
 	
 	private function filter($data, $limit = null)
@@ -273,8 +281,8 @@ class user {
 	private function get_article ($username, $password, $id) {
 	    //FIXME: Check inputs
     
-	    $result = new stdClass();
-	    $tagtype = TAG_TYPE_ARTICLE;
+//	    $result = new stdClass();
+//	    $tagtype = TAG_TYPE_ARTICLE;
 	    
 	    // Set the parameter to build the query.
 	    $start = 0;
@@ -305,7 +313,7 @@ class user {
 
 	    // Take the query and load the data from the database. This function is secured 
 	    // by password and username. It logs the user in on execution and log out on return.
-	    $result->data = rpcjson_helper::build_payload ($username, $password, get_class($this), $query, 0);
+	    $result = rpcjson_helper::build_payload ($username, $password, get_class($this), $query, FALSE);
 	    	    
 		return $result;
 	}
@@ -363,8 +371,11 @@ class user {
         
         return $result;
 	}
-
-
+	
+	
+// -----------------------------------------------------------------------------
+// User 	
+// -----------------------------------------------------------------------------	
 
 	public function get_user ($username, $password) 
 	{
@@ -491,15 +502,18 @@ class user {
 	{
 	    return 'NOT IMPLEMENTED';
 	}
-	
-	public function get_blog_intro($username, $password, $start, $number) 
+
+// -----------------------------------------------------------------------------
+// News
+// -----------------------------------------------------------------------------	
+	public function getNewsIntro($username, $password, $start, $number) 
 	{
 	    $where = "#__content.catid = 34 ";
 	    $order = "#__content.created DESC";
 	    return $this->get_articles_intro($username, $password, $start, $number, $where, $order);
 	}
 	
-	public function get_blog($username, $password, $id)
+	public function getNews($username, $password, $id)
 	{
 	    return $this->get_article ($username, $password, $id);
 	}
@@ -512,25 +526,31 @@ class user {
 	    return $this->update_content($username, $password, "#__content", $sectionid, $catid, $input);
 	}
 	
-	public function get_polls($username, $password, $start, $limit)
+	/**
+	 * \brief Get list of polls from $start until $limit.
+	 * \details The $start and $limit parameters should be used to load more 
+	 *          if you need to emulating pages.
+	 * \param $username
+	 * \param $password
+	 * \param $start
+	 * \param $limit
+	 * \return A list of polls limited by the parameters $start and $limit.
+	 */
+	public function getPolls($username, $password, $start, $limit)
 	{
 	
-	    $tagtype = TAG_TYPE_POLL;
 	    // Set the parameter to build the query.
-	    $where = "published = 1 ";
+	    $where = "published = 1 "; // FIXME: Check the access level 
 	    $order = "#__polls.id DESC ";
 	    	    
 	    $db =& JFactory::getDBO();
    	    if( rpcjson_helper::is_joomla15() ) { 
 	        $query = rpcjson_helper::build_db_query(
-	        "SELECT IFNULL(NULL, ".$db->quote($tagtype).") AS 'respt', ".
+	        "SELECT ".
 	            "   #__polls.id, ".
 				"	#__polls.title, ".
-				"	#__polls.voters AS 'voters', ".
-				"	#__polls.checked_out_time ".
-				"FROM #__polls ".
-				"LEFT JOIN #__users ".
-				"	ON #__users.id = #__polls.checked_out ",
+				"	#__polls.voters AS 'voters' ".
+				"FROM #__polls ",
 				$start, $limit, $where, $order);
 	    }
 	    // FIXME: Add the query code for joomla > 1.5
@@ -540,25 +560,80 @@ class user {
 	    return rpcjson_helper::build_payload ($username, $password, get_class($this), $query, TRUE);
 	}
 	
-	public function get_poll($username, $password, $id)
+	/**
+	 * \brief Get usernames which have submit for the selected poll.
+	 * 
+	 * \param $username Username to get access.
+	 * \param $password Password to get access.
+	 * \param $id Identification number to select the poll.
+	 * \return Usernames which have submit the selected poll.
+	 */
+	public function getPollUsers($username, $password, $id)
 	{
-		JTable::addIncludePath(JPATH_ADMINISTRATOR.DS.'components'.DS.'com_rpcjson'.DS.'tables');
+	    // Get database object
+	    $db =& JFactory::getDBO();
+
+	    // Set the parameter to build the query.
+	    $where = "#__polls_users.pid = ".$db->quote($id)." ";
+	    $order = "";
+	    $start = 0;
+	    $limit = 100;
 	    	    
-	    $row =& JTable::getInstance('poll', 'Table');
-	
-	    // load the item's data so we'll know with what item were dealing with
-	    if (!$row->load($id)) 
-	    {
-	        return JError::raiseWarning( 500, $row->getError() );
+   	    if( rpcjson_helper::is_joomla15() ) { 
+	        $query = rpcjson_helper::build_db_query(
+	        "SELECT ".
+				"	#__users.name ".
+				"FROM #__users ".
+				"LEFT JOIN #__polls_users ".
+				"	ON #__users.id = #__polls_users.uid ",
+				$start, $limit, $where, $order);
 	    }
-	    
-	    if($row->published != 1)
-	    {
-	        return "Sorry, this poll is not available for you!";
-	    }
-	    	    
-	    return $row->getData();
+	    // FIXME: Add the query code for joomla > 1.5
+
+	    // Take the query and load the data from the database. This function is secured 
+	    // by password and username. It logs the user in on execution and log out on return.
+	    return rpcjson_helper::build_payload ($username, $password, get_class($this), $query, TRUE);
 	}
+	
+	/**
+	 * \brief Get list of data for selected poll.
+	 * 
+	 * \param $username Username to get access.
+	 * \param $password Password to get access.
+	 * \param $id Identification number to select the poll.
+	 * \return A list of data for selected poll.
+	 */
+	public function getPollData($username, $password, $id)
+	{
+	    // Get database object
+	    $db =& JFactory::getDBO();
+
+	    // Set the parameter to build the query.
+	    $where = " #__poll_data.pollid = ".$db->quote($id)."  AND #__poll_data.text != ''";
+	    $order = " #__poll_data.hits DESC ";
+	    unset($start);
+	    unset($limit);
+	    	    
+   	    if( rpcjson_helper::is_joomla15() ) { 
+	        $query = rpcjson_helper::build_db_query(
+	        "SELECT ".
+				" #__poll_data.text, ".
+				" #__poll_data.hits ".
+				"FROM #__poll_data ",
+				$start, $limit, $where, $order);
+	    }
+	    // FIXME: Add the query code for joomla > 1.5
+
+	    // Take the query and load the data from the database. This function is secured 
+	    // by password and username. It logs the user in on execution and log out on return.
+	    return rpcjson_helper::build_payload ($username, $password, get_class($this), $query, TRUE);
+	}
+	
+	
+	public function getPollDataFull($username, $password, $id)
+	{
+	}
+	
 	/**
 	 * @brief Register a new user.
 	 *
@@ -572,19 +647,19 @@ class user {
 	 *
 	 * @return a response type 'user' if registration success. Otherwise returns an 'jerror' response type.
 	 */
-	public function register_user ($name, $username, $email, $password, $password_retype, $license, $code) {
+	private function register_user ($name, $username, $email, $password, $password_retype, $license, $code) {
 	    return 'NOT IMPLEMENTED';
 	}
 	
-	public function upload_image ($username, $password, $filename, $filecontents) {
+	private function upload_image ($username, $password, $filename, $filecontents) {
 	    return 'NOT IMPLEMENTED';
 	}
 
-	public function get_event ($username, $password) {
+	private function get_event ($username, $password) {
 	    return 'NOT IMPLEMENTED';
 	}
 	
-	public function get_events ($username, $password) {
+	private function get_events ($username, $password) {
 	    return 'NOT IMPLEMENTED';
 	}	
 }
