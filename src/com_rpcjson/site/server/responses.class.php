@@ -129,12 +129,16 @@ class Response {
         }else {
             list($class, $method) = $methodRaw;  
         }
-		 
-		if ( !file_exists( JPATH_COMPONENT.DS.'services'.DS."{$class}.class.php") ) {
+		
+		// This is needed on Unix systems. The class names are with uppercase at
+		// the beginning but the filename of the services is with lowercase.
+		$classfile = strtolower($class);
+		
+		if ( !file_exists( JPATH_COMPONENT.DS.'services'.DS."{$classfile}.class.php") ) {
 			$this->oResponse = errors::getInstance()->getError(CLASS_NOT_FOUND);
             return;
 		}
-        require_once (JPATH_COMPONENT.DS.'services'.DS."{$class}.class.php");
+        require_once (JPATH_COMPONENT.DS.'services'.DS."{$classfile}.class.php");
 		 
         $ServerClass          = new ReflectionClass($class);
         $service              = $ServerClass->newInstanceArgs();
