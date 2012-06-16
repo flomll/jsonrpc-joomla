@@ -1,37 +1,20 @@
 This is a component for the CMS Joomla to use RPC with JSON. Now it is in developer state and not stable to install. If the first stable version is tested it will be printed here. The goal of this project is a extension to simple add any other components to get json responses for external devices like iPhone/iPad and so on.
 
-URL at Joomla:
-http://www.yourdomain.yourextension/index.php?option=com_rpcjson
-
 
 HowToUse:
-It includes a default service which is inlcuded. The name of the service is globally defined with "rpc". If you implement a custom
-service you should implement a class with some public methods. 
+The only thing you have to do is: submit a JSON request to your domain like the following sample.
+
+http://www.yourdomain.yourextension/index.php?option=com_rpcjson
+
+Replace the url "yourdomain.youextension" with own. You can test the server with a program like Fetch or you submit a HTTP POST message to the server. Now the component includes the services
+
+- Content
+- Poll
+- System
 
 Samples Request/Responses:
-Request -> {"jsonrpc": "2.0", "method": "rpc.listm", "id": 1}
-Response <- {"jsonrpc":"2.0","result":{"myClass":["ping","test2"]},"id":1}
-
-Request -> {"jsonrpc": "2.0", "method": "myClass.ping", "params": ["hello world"], "id": 1}
-Response <- {"jsonrpc":"2.0","result":["pong:hello world"],"id":1}
-
-Request -> 	{"jsonrpc":"2.0","method":"user.get_articles_intro",
-			"params":
-				[
-					0, 1, "", "id ASC",
-					"demo","demo"
-				],
-			"id":1
-		}
-
-Response <- All available contents.
-
-{"jsonrpc":"2.0","method":"user.get_users",
-"params": [
-"demo","demo", 0, 10, "", "ASC"
-],
-"id":1
-}
+Request -> {"jsonrpc": "2.0", "method": "Content.getNewsIntro", "id": 1}
+Response <- {"jsonrpc":"2.0","result":[]},"id":1}
 
 FIXED: [14-02-2012]
 - The key "error" should not be at all responses. The key "error" is only includes if it is really an error.

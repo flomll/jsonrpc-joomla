@@ -1,0 +1,56 @@
+\section{Version 0.1}
+
+//------------------------------------------------------------------------------
+// Joomla CONTENT
+//------------------------------------------------------------------------------
+\subsection{Content}
+\begin{description}
+cid
+title
+introtext
+fulltext
+access
+category
+section
+state
+created
+created_by_name
+modified
+modified_by_name
+rating_sum
+rating_count
+hits
+\end{description}
+
+//------------------------------------------------------------------------------
+// Joomla CONTENT LIST
+//------------------------------------------------------------------------------
+\subsection{Content List}
+\begin{description}
+cid
+title
+introtext
+category
+section
+state
+created
+created_by_name
+rating_sum
+hits
+\end{description}
+
+//------------------------------------------------------------------------------
+// Joomla POLL
+//------------------------------------------------------------------------------
+title
+voters
+
+data.text
+data.hits
+
+//------------------------------------------------------------------------------
+// Joomla POLL LIST
+//------------------------------------------------------------------------------
+id
+title
+voters
