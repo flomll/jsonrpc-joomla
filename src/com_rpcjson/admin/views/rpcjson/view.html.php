@@ -32,7 +32,8 @@ class RpcJsonViewRpcJson extends JView
 		$isNew		= ($hello->id < 1);
 
 		$text = $isNew ? JText::_( 'New' ) : JText::_( 'Edit' );
-		JToolBarHelper::title(   JText::_( 'Hello' ).': <small><small>[ ' . $text.' ]</small></small>' );
+		JToolBarHelper::title(   JText::_( 'Joomla RPCJ' ).': <small><small>[ ' . $text.' ]</small></small>' );
+		JToolBarHelper::preferences( 'com_rpcjson');
 		JToolBarHelper::save();
 		if ($isNew)  {
 			JToolBarHelper::cancel();

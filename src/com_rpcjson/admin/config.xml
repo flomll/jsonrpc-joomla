@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <params>
+    <param name="newsSectionId" default="1" type="text" size="3" label="News section ID:"/>
+    <param name="newsCategoryId" default="1" type="text" size="3" label="News category ID:"/>
+  </params>
+</root>
