@@ -139,10 +139,12 @@ class rpcjson_helper {
 			$query .= " LIMIT ".(int)$start.", ".(int)$limit." ";
 		}
 	    
+	    $query .= ";";
 	    return $query;
 	}
 	
-	function build_payload($username, $password, $service, $query, $multipleRows, $checkoutTable = null, $checkoutId = null, $includeCount = false) 
+	function build_payload($username, $password, $service, $query, $multipleRows, $modifiction = false) 
+// 	function build_payload($username, $password, $service, $query, $multipleRows, $checkoutTable = null, $checkoutId = null, $includeCount = false) 
 	{
 	    $response = new stdClass();
         // User Authentication
@@ -175,14 +177,17 @@ class rpcjson_helper {
 		$db->setQuery($query);
 		$db->query();
 		
- 	    // Add rows number if the 
-		$response->count = $db->getNumRows();
+		if($modifiction == false) 
+		{
+ 	    	// Add rows number if the 
+			$response->count = $db->getNumRows();
+		}
 
         // Load array of data if more then one here.
- 	    if($multipleRows == TRUE)
+ 	    if($multipleRows == true && $modifiction == false)
  	    {
  	        $response->data = $db->loadObjectList();
- 	    } else
+ 	    } else if($multipleRows == false && $modifiction == false)
  	    {
  	        $response->data = $db->loadObject();
  	    }
@@ -194,6 +199,8 @@ class rpcjson_helper {
 			//JoomlaAdminMobileHelper::respondAndDie($db->getErrorMsg());
 			return $db->getErrorMsg();
 		}
+		
+		$response->code = 200; // Return code 200 - successfully proceeded.
 
         // Log the user out
         rpcjson_helper::logout_user();
