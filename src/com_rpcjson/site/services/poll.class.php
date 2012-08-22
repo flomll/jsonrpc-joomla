@@ -57,16 +57,16 @@ class Poll {
 	
 	    // Set the parameter to build the query.
 	    $where = "published = 1 "; // FIXME: Check the access level 
-	    $order = "#__polls.id DESC ";
+	    $order = "#__mfpolls.id DESC ";
 	    	    
 	    $db =& JFactory::getDBO();
    	    if( rpcjson_helper::is_joomla15() ) { 
 	        $query = rpcjson_helper::build_db_query(
 	        "SELECT ".
-	            "   #__polls.id, ".
-				"	#__polls.title, ".
-				"	#__polls.voters AS 'voters' ".
-				"FROM #__polls ",
+	            "   #__mfpolls.id, ".
+				"	#__mfpolls.title, ".
+				"	#__mfpolls.voters AS 'voters' ".
+				"FROM #__mfpolls ",
 				$start, $limit, $where, $order);
 	    }
 	    // FIXME: Add the query code for joomla > 1.5
@@ -90,7 +90,7 @@ class Poll {
 	    $db =& JFactory::getDBO();
 
 	    // Set the parameter to build the query.
-	    $where = "#__polls_users.pid = ".$db->quote($id)." ";
+	    $where = "#__mfpolls_users.pid = ".$db->quote($id)." ";
 	    $order = "";
 	    $start = 0;
 	    $limit = 100;
@@ -100,8 +100,8 @@ class Poll {
 	        "SELECT ".
 				"	#__users.name ".
 				"FROM #__users ".
-				"LEFT JOIN #__polls_users ".
-				"	ON #__users.id = #__polls_users.uid ",
+				"LEFT JOIN #__mfpolls_users ".
+				"	ON #__users.id = #__mfpolls_users.uid ",
 				$start, $limit, $where, $order);
 	    }
 	    // FIXME: Add the query code for joomla > 1.5
@@ -125,18 +125,18 @@ class Poll {
 	    $db =& JFactory::getDBO();
 
 	    // Set the parameter to build the query.
-	    $where = " #__poll_data.pollid = ".$db->quote($id)."  AND #__poll_data.text != ''";
-	    $order = " #__poll_data.hits DESC ";
+	    $where = " #__mfpoll_data.pollid = ".$db->quote($id)."  AND #__mfpoll_data.text != ''";
+	    $order = " #__mfpoll_data.hits DESC ";
 	    unset($start);
 	    unset($limit);
 	    	    
    	    if( rpcjson_helper::is_joomla15() ) { 
 	        $query = rpcjson_helper::build_db_query(
 	        "SELECT ".
-	        	" #__poll_data.id, ".
-				" #__poll_data.text, ".
-				" #__poll_data.hits ".
-				"FROM #__poll_data ",
+	        	" #__mfpoll_data.id, ".
+				" #__mfpoll_data.text, ".
+				" #__mfpoll_data.hits ".
+				"FROM #__mfpoll_data ",
 				$start, $limit, $where, $order);
 	    }
 	    // FIXME: Add the query code for joomla > 1.5
@@ -146,7 +146,7 @@ class Poll {
 	    return rpcjson_helper::build_payload ($username, $password, get_class($this), $query, TRUE);
 	}
 	
-	public function vote($username, $password, $id, $vote)
+	public function vote($username, $password, $pollid, $optionid)
 	{
 		$response = new stdClass();
 	    // Check the authority of the user. This should be done on every service function.
@@ -154,61 +154,27 @@ class Poll {
  	        $response->failure = 'Invalid username or password!';
  	        return $response;
  	    }
+ 	    
+ 	    $pollid = (int)$pollid;
+ 	    $optionid = (int)$optionid;
 
-		// Get database object
-	    $db =& JFactory::getDBO();
-
-	    // Set the parameter to build the query.
-	    $whereOption = " #__poll_data.id = ".(int)$vote." AND #__poll_data.pollid = ".(int)$id." ";
-	    $wherePoll = " #__polls.id = ".(int)$id." ";
-	    unset($order);
-	    unset($start);
-	    unset($limit);
-	    	    
-   	    if( rpcjson_helper::is_joomla15() ) {
-   	    	// Update the hits on the option
-	        $queryOption = rpcjson_helper::build_db_query(
-	        "UPDATE ".
-				" #__poll_data ".
-				" SET ".
-				" #__poll_data.hits=#__poll_data.hits+1 ",
-				$start, $limit, $whereOption, $order);
-				
-			// Update the number of hits on the poll self.
-			$queryPoll = rpcjson_helper::build_db_query(
-	        "UPDATE ".
-				" #__polls ".
-				" SET ".
-				" #__polls.voters=#__polls.voters+1 ",
-				$start, $limit, $wherePoll, $order);
-				
-// 			$query = $queryOption." ".$queryPoll;
-	    }
-	    // FIXME: Add the query code for joomla > 1.5
-	    
-	    // FIXME: Joomla API has problems with multible UPDATE command submit by one 
-	    // $db->query(). Workaround is we split have to execute the method $db->query()
-	    // for two times to update the tables.
-	    $db = &JFactory::getDBO();
-		$db->setQuery($queryOption);
-		$db->query();
+		$isLoaded = JPluginHelper::importPlugin( 'mfpoll', 'mfpollsystem' );
+		$dispatcher =& JDispatcher::getInstance();
 		
-		// Error handling for DB
-		if( $db->getErrorNum() )
-		{
-			return $db->getErrorMsg();
-		}
-
-		$db->setQuery($queryPoll);
-		$db->query();
+		// The user is authenticated so we are ready to fire the onVote event to do the
+		// operation.
+		$res = $dispatcher->trigger( 'onVote', array($pollid, $optionid) );
 		
-		// Error handling for DB
-		if( $db->getErrorNum() )
-		{
-			return $db->getErrorMsg();
+		print_r($res);
+		if( !in_array(false, $res, true) ) {
+			echo "OK";
 		}
 		
-		$response->code = 200; // Return code 200 - successfully proceeded.
+		if($res) {
+			$response->code = 200; // Return code 200 - successfully proceeded.
+		} else {
+			$response->code = 400; // Return code 400 - something wrong.
+		}			
 	    
 		rpcjson_helper::logout_user();
 		return $response;
