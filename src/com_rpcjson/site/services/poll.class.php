@@ -165,17 +165,11 @@ class Poll {
 		// operation.
 		$res = $dispatcher->trigger( 'onVote', array($pollid, $optionid) );
 		
-		print_r($res);
 		if( !in_array(false, $res, true) ) {
-			echo "OK";
-		}
-		
-		if($res) {
-			$response->code = 200; // Return code 200 - successfully proceeded.
-		} else {
 			$response->code = 400; // Return code 400 - something wrong.
-		}			
-	    
+		}else
+			$response->code = 200; // Return code 200 - successfully proceeded.
+			    
 		rpcjson_helper::logout_user();
 		return $response;
 	}	
